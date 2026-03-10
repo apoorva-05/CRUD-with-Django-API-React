@@ -1,0 +1,72 @@
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import GroceryItemSerializer
+from .models import GroceryItem
+ 
+ 
+class GroceryListAPIView(APIView):
+    def get(self, request):
+        items = GroceryItem.objects.all()
+        serializer = GroceryItemSerializer(items, many=True)
+        return Response(serializer.data)
+ 
+    def post(self, request):
+        serializer = GroceryItemSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Item added!', 'data': serializer.data},
+                            status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+ 
+class GroceryDetailAPIView(APIView):
+    def get_object(self, pk):
+        try:
+            return GroceryItem.objects.get(pk=pk)
+        except GroceryItem.DoesNotExist:
+            return None
+ 
+    def get(self, request, pk):
+        item = self.get_object(pk)
+        if not item:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(GroceryItemSerializer(item).data)
+ 
+    def put(self, request, pk):
+        item = self.get_object(pk)
+        if not item:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = GroceryItemSerializer(item, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Updated!', 'data': serializer.data})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+    def patch(self, request, pk):
+        item = self.get_object(pk)
+        if not item:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = GroceryItemSerializer(item, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Updated!', 'data': serializer.data})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+    def delete(self, request, pk):
+        item = self.get_object(pk)
+        if not item:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+        item.delete()
+        return Response({'message': 'Deleted!'}, status=status.HTTP_204_NO_CONTENT)
+ 
+ 
+class GroceryToggleAPIView(APIView):
+    def post(self, request, pk):
+        try:
+            item = GroceryItem.objects.get(pk=pk)
+            item.completed = not item.completed
+            item.save()
+            return Response({'message': 'Toggled!', 'data': GroceryItemSerializer(item).data})
+        except GroceryItem.DoesNotExist:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)

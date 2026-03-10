@@ -11,8 +11,12 @@ function App() {
   const [editId, setEditId] = useState(null);
 
   const fetchItems = async () => {
-    const res = await axios.get(API);
-    setItems(res.data);
+    try {
+      const res = await axios.get(API);
+      setItems(res.data);
+    } catch (error) {
+      toast.error("Failed to load items");
+    }
   };
 
   useEffect(() => {
@@ -45,14 +49,22 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(API + id + "/");
-    toast.success("Item deleted");
-    fetchItems();
+    try {
+      await axios.delete(API + id + "/");
+      toast.success("Item deleted");
+      fetchItems();
+    } catch {
+      toast.error("Delete failed");
+    }
   };
 
   const handleToggle = async (id) => {
-    await axios.post(API + id + "/toggle/");
-    fetchItems();
+    try {
+      await axios.post(API + id + "/toggle/");
+      fetchItems();
+    } catch {
+      toast.error("Toggle failed");
+    }
   };
 
   const handleEdit = (item) => {
@@ -61,7 +73,7 @@ function App() {
   };
 
   return (
-    <div style={{ width: "400px", margin: "50px auto", textAlign: "center" }}>
+    <div className="container">
       <ToastContainer position="top-center" />
 
       <h1>Grocery Bud 🛒</h1>
@@ -76,23 +88,20 @@ function App() {
         <button type="submit">{editId ? "Update" : "Add"}</button>
       </form>
 
-      <ul style={{ listStyle: "none", padding: 0 }}>
+      <ul>
         {items.map((item) => (
-          <li key={item.id} style={{ marginTop: "10px" }}>
+          <li key={item.id}>
             <span
-              style={{
-                textDecoration: item.completed ? "line-through" : "none",
-                marginRight: "10px",
-                cursor: "pointer",
-              }}
+              className={item.completed ? "completed" : ""}
               onClick={() => handleToggle(item.id)}
             >
               {item.name}
             </span>
 
-            <button onClick={() => handleEdit(item)}>Edit</button>
-
-            <button onClick={() => handleDelete(item.id)}>Delete</button>
+            <div>
+              <button onClick={() => handleEdit(item)}>Edit</button>
+              <button onClick={() => handleDelete(item.id)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>

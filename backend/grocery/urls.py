@@ -1,10 +1,8 @@
 from django.urls import path
-from . import views
-
-app_name = 'grocery'
+from .views import GroceryListAPIView, GroceryDetailAPIView, GroceryToggleAPIView
 
 urlpatterns = [
-    path('', views.GroceryListAPIView.as_view(), name='grocery-list'),
-    path('<int:pk>/', views.GroceryDetailAPIView.as_view(), name='grocery-detail'),
-    path('<int:pk>/toggle/', views.GroceryToggleAPIView.as_view(), name='grocery-toggle'),
+    path('grocery/', GroceryListAPIView.as_view()),
+    path('grocery/<int:pk>/', GroceryDetailAPIView.as_view()),
+    path('grocery/<int:pk>/toggle/', GroceryToggleAPIView.as_view()),
 ]

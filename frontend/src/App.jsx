@@ -1,135 +1,98 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const BASE_URL = "http://127.0.0.1:8000/api/grocery";
+const API = "http://127.0.0.1:8000/api/grocery/";
 
 function App() {
   const [items, setItems] = useState([]);
-  const [inputValue, setInputValue] = useState("");
+  const [name, setName] = useState("");
   const [editId, setEditId] = useState(null);
-  const [editValue, setEditValue] = useState("");
 
-  // Load items from API on mount
+  const fetchItems = async () => {
+    const res = await axios.get(API);
+    setItems(res.data);
+  };
+
   useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await fetch(`${BASE_URL}/`);
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setItems(data);
-      } catch {
-        toast.error("Could not load grocery list");
-      }
-    };
     fetchItems();
   }, []);
 
-  const addItem = async () => {
-    if (!inputValue.trim()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!name.trim()) {
+      toast.error("Item cannot be empty");
+      return;
+    }
+
     try {
-      const res = await fetch(`${BASE_URL}/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: inputValue, completed: false }),
-      });
-      if (!res.ok) throw new Error();
-      const newItem = await res.json();
-      setItems((prev) => [...prev, newItem.data]);
-      setInputValue("");
-      toast.success("Item added!");
-    } catch {
-      toast.error("Could not add item");
+      if (editId) {
+        await axios.put(API + editId + "/", { name });
+        toast.success("Item updated");
+        setEditId(null);
+      } else {
+        await axios.post(API, { name });
+        toast.success("Item added");
+      }
+
+      setName("");
+      fetchItems();
+    } catch (error) {
+      toast.error("Error occurred");
     }
   };
 
-  const editCompleted = async (itemId) => {
-    try {
-      const res = await fetch(`${BASE_URL}/${itemId}/toggle/`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error();
-      const updated = await res.json();
-      setItems((prev) =>
-        prev.map((item) => (item.id === itemId ? updated.data : item)),
-      );
-    } catch {
-      toast.error("Could not update item");
-    }
+  const handleDelete = async (id) => {
+    await axios.delete(API + id + "/");
+    toast.success("Item deleted");
+    fetchItems();
   };
 
-  const removeItem = async (itemId) => {
-    try {
-      const res = await fetch(`${BASE_URL}/${itemId}/`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
-      setItems((prev) => prev.filter((item) => item.id !== itemId));
-      toast.success("Item deleted");
-    } catch {
-      toast.error("Could not delete item");
-    }
+  const handleToggle = async (id) => {
+    await axios.post(API + id + "/toggle/");
+    fetchItems();
   };
 
-  const updateItemName = async (newName) => {
-    try {
-      const res = await fetch(`${BASE_URL}/${editId}/`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName }),
-      });
-      if (!res.ok) throw new Error();
-      const updated = await res.json();
-      setItems((prev) =>
-        prev.map((item) => (item.id === editId ? updated.data : item)),
-      );
-      setEditId(null);
-      toast.success("Item updated!");
-    } catch {
-      toast.error("Could not update item");
-    }
+  const handleEdit = (item) => {
+    setName(item.name);
+    setEditId(item.id);
   };
 
   return (
-    <div className="container">
+    <div style={{ width: "400px", margin: "50px auto", textAlign: "center" }}>
       <ToastContainer position="top-center" />
+
       <h1>Grocery Bud 🛒</h1>
-      <div className="form">
+
+      <form onSubmit={handleSubmit}>
         <input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addItem()}
-          placeholder="Add grocery item..."
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter item"
         />
-        <button onClick={addItem}>Add</button>
-      </div>
-      <ul>
+
+        <button type="submit">{editId ? "Update" : "Add"}</button>
+      </form>
+
+      <ul style={{ listStyle: "none", padding: 0 }}>
         {items.map((item) => (
-          <li key={item.id} className={item.completed ? "completed" : ""}>
-            {editId === item.id ? (
-              <>
-                <input
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  autoFocus
-                />
-                <button onClick={() => updateItemName(editValue)}>Save</button>
-                <button onClick={() => setEditId(null)}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <span onClick={() => editCompleted(item.id)}>{item.name}</span>
-                <div>
-                  <button
-                    onClick={() => {
-                      setEditId(item.id);
-                      setEditValue(item.name);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => removeItem(item.id)}>Delete</button>
-                </div>
-              </>
-            )}
+          <li key={item.id} style={{ marginTop: "10px" }}>
+            <span
+              style={{
+                textDecoration: item.completed ? "line-through" : "none",
+                marginRight: "10px",
+                cursor: "pointer",
+              }}
+              onClick={() => handleToggle(item.id)}
+            >
+              {item.name}
+            </span>
+
+            <button onClick={() => handleEdit(item)}>Edit</button>
+
+            <button onClick={() => handleDelete(item.id)}>Delete</button>
           </li>
         ))}
       </ul>

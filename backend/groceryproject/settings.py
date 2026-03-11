@@ -9,19 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # --------------------------
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "dev-secret-key"
-)
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'dev-secret-key')
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "crud-drf.up.railway.app",
-]
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
 
 # --------------------------
 # APPLICATIONS

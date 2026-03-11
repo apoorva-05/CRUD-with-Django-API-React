@@ -10,7 +10,7 @@ function App() {
   const [name, setName] = useState("");
   const [editId, setEditId] = useState(null);
 
-  // Fetch all grocery items
+  // Fetch groceries
   const fetchItems = async () => {
     try {
       const res = await axios.get(API);
@@ -28,7 +28,11 @@ function App() {
   // Add or update item
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return toast.error("Item cannot be empty");
+
+    if (!name.trim()) {
+      toast.error("Item cannot be empty");
+      return;
+    }
 
     try {
       if (editId) {
@@ -39,15 +43,16 @@ function App() {
         await axios.post(API, { name });
         toast.success("Item added");
       }
+
       setName("");
       fetchItems();
     } catch (error) {
       console.error(error);
-      toast.error("Error occurred");
+      toast.error("Something went wrong");
     }
   };
 
-  // Delete item
+  // Delete
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API}${id}/`);
@@ -70,7 +75,7 @@ function App() {
     }
   };
 
-  // Edit item
+  // Edit
   const handleEdit = (item) => {
     setName(item.name);
     setEditId(item.id);
@@ -99,6 +104,7 @@ function App() {
             >
               {item.name}
             </span>
+
             <div>
               <button onClick={() => handleEdit(item)}>Edit</button>
               <button onClick={() => handleDelete(item.id)}>Delete</button>

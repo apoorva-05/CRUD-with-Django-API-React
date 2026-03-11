@@ -13,8 +13,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------
 # Use environment variables for production
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '}Gdz2zG[dU^!^8??')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'crud-drf.up.railway.app').split(',')
+DEBUG ='True'
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "crud-drf.up.railway.app",
+]
 
 # --------------------------
 # APPLICATIONS
@@ -117,12 +121,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # --------------------------
 # CORS (React frontend)
 # --------------------------
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-else:
-    CORS_ALLOWED_ORIGINS = [
-        "https://crud-drf.netlify.app",
-    ]
+# CORS
+CORS_ALLOW_ALL_ORIGINS = True
 
 # --------------------------
 # DEFAULT PRIMARY KEY

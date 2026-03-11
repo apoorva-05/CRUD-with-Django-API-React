@@ -5,5 +5,5 @@ from grocery.views import index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('grocery.urls')),
-    path('', index),   # frontend root
+    path('', index),
 ]

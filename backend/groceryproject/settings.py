@@ -16,7 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --------------------------
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = [
+    "crud-drf.up.railway.app",
+]
 
 # --------------------------
 # APPLICATIONS

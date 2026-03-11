@@ -3,7 +3,7 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const API = "http://127.0.0.1:8000/api/grocery/";
+const API = import.meta.env.VITE_API_URL;
 
 function App() {
   const [items, setItems] = useState([]);

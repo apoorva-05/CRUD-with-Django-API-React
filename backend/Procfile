@@ -1,1 +1,1 @@
-web: gunicorn GROCERY-CRUD-DRF.wsgi
+web: gunicorn groceryproject.wsgi
